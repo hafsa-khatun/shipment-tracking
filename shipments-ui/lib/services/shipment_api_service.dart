@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/shipment.dart';
 
 class ShipmentApiService {
-  // Emulator: 10.0.2.2 | Real device: your PC's IP
+
   static const String _base = 'http://10.0.2.2:8080/api/shipments';
 
   Future<List<Shipment>> fetchByStatus(ShipmentStatus status) async {

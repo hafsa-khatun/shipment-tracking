@@ -4,13 +4,14 @@ import com.example.shipment_tracking.daos.ShipmentDTO;
 import com.example.shipment_tracking.models.Shipment;
 import com.example.shipment_tracking.models.ShipmentStatus;
 import com.example.shipment_tracking.repositories.ShipmentRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Service
 public class ShipmentService {
+
     private final ShipmentRepository repository;
     private final InvoiceSequenceService invoiceSequenceService;
 
@@ -20,6 +21,7 @@ public class ShipmentService {
         this.invoiceSequenceService = invoiceSequenceService;
     }
 
+    // ─── Create ────────────────────────────────────────────────
     @Transactional
     public ShipmentDTO.Response create(ShipmentDTO.CreateRequest req) {
         if (repository.existsByGlobalRefNumber(req.getGlobalRefNumber()))
@@ -38,16 +40,60 @@ public class ShipmentService {
         return toResponse(repository.save(shipment));
     }
 
-    public List<ShipmentDTO.Response> getByStatus(ShipmentStatus status) {
-        return repository.findByStatusOrderByCreatedAtDesc(status)
-                .stream().map(this::toResponse).collect(Collectors.toList());
-    }
-
+    // ─── Read All ──────────────────────────────────────────────
     public List<ShipmentDTO.Response> getAll() {
-        return repository.findAll()
+        return repository.findAllByOrderByIdAsc()
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
+    // ─── Read by Status ────────────────────────────────────────
+    public List<ShipmentDTO.Response> getByStatus(ShipmentStatus status) {
+        return repository.findByStatusOrderByIdAsc(status)
+                .stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    // ─── Read by ID ────────────────────────────────────────────
+    public ShipmentDTO.Response getById(Long id) {
+        Shipment shipment = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found."));
+        return toResponse(shipment);
+    }
+
+    // ─── Update ────────────────────────────────────────────────
+    @Transactional
+    public ShipmentDTO.Response update(Long id, ShipmentDTO.UpdateRequest req) {
+        Shipment shipment = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found."));
+
+        if (shipment.getStatus() == ShipmentStatus.COMPLETED)
+            throw new IllegalStateException("Completed shipment cannot be edited.");
+
+        if (repository.existsByGlobalRefNumberAndIdNot(req.getGlobalRefNumber(), id))
+            throw new IllegalArgumentException("Global reference number already exists.");
+        if (repository.existsByHawbNumberAndIdNot(req.getHawbNumber(), id))
+            throw new IllegalArgumentException("HAWB number already exists.");
+
+        shipment.setCustomerName(req.getCustomerName());
+        shipment.setGlobalRefNumber(req.getGlobalRefNumber());
+        shipment.setHawbNumber(req.getHawbNumber());
+        shipment.setNotes(req.getNotes());
+
+        return toResponse(repository.save(shipment));
+    }
+
+    // ─── Delete ────────────────────────────────────────────────
+    @Transactional
+    public void delete(Long id) {
+        Shipment shipment = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found."));
+
+        if (shipment.getStatus() == ShipmentStatus.COMPLETED)
+            throw new IllegalStateException("Completed shipment cannot be deleted.");
+
+        repository.delete(shipment);
+    }
+
+    // ─── Advance Status ────────────────────────────────────────
     @Transactional
     public ShipmentDTO.Response advanceStatus(Long id) {
         Shipment shipment = repository.findById(id)
@@ -67,6 +113,7 @@ public class ShipmentService {
         return toResponse(repository.save(shipment));
     }
 
+    // ─── Mapper ────────────────────────────────────────────────
     private ShipmentDTO.Response toResponse(Shipment s) {
         ShipmentDTO.Response r = new ShipmentDTO.Response();
         r.setId(s.getId());
