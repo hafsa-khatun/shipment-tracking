@@ -21,7 +21,7 @@ public class ShipmentService {
         this.invoiceSequenceService = invoiceSequenceService;
     }
 
-    // ─── Create ────────────────────────────────────────────────
+    
     @Transactional
     public ShipmentDTO.Response create(ShipmentDTO.CreateRequest req) {
         if (repository.existsByGlobalRefNumber(req.getGlobalRefNumber()))
@@ -40,26 +40,26 @@ public class ShipmentService {
         return toResponse(repository.save(shipment));
     }
 
-    // ─── Read All ──────────────────────────────────────────────
+    
     public List<ShipmentDTO.Response> getAll() {
         return repository.findAllByOrderByIdAsc()
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    // ─── Read by Status ────────────────────────────────────────
+    
     public List<ShipmentDTO.Response> getByStatus(ShipmentStatus status) {
         return repository.findByStatusOrderByIdAsc(status)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    // ─── Read by ID ────────────────────────────────────────────
+    
     public ShipmentDTO.Response getById(Long id) {
         Shipment shipment = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found."));
         return toResponse(shipment);
     }
 
-    // ─── Update ────────────────────────────────────────────────
+    
     @Transactional
     public ShipmentDTO.Response update(Long id, ShipmentDTO.UpdateRequest req) {
         Shipment shipment = repository.findById(id)
@@ -81,7 +81,7 @@ public class ShipmentService {
         return toResponse(repository.save(shipment));
     }
 
-    // ─── Delete ────────────────────────────────────────────────
+    
     @Transactional
     public void delete(Long id) {
         Shipment shipment = repository.findById(id)
@@ -93,7 +93,7 @@ public class ShipmentService {
         repository.delete(shipment);
     }
 
-    // ─── Advance Status ────────────────────────────────────────
+    
     @Transactional
     public ShipmentDTO.Response advanceStatus(Long id) {
         Shipment shipment = repository.findById(id)
@@ -113,7 +113,7 @@ public class ShipmentService {
         return toResponse(repository.save(shipment));
     }
 
-    // ─── Mapper ────────────────────────────────────────────────
+    
     private ShipmentDTO.Response toResponse(Shipment s) {
         ShipmentDTO.Response r = new ShipmentDTO.Response();
         r.setId(s.getId());
