@@ -20,28 +20,27 @@ public class ShipmentController {
         this.service = service;
     }
 
-    // POST /api/shipments
+   
     @PostMapping
     public ResponseEntity<ShipmentDTO.Response> create(
             @Valid @RequestBody ShipmentDTO.CreateRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req));
     }
 
-    // GET /api/shipments
-    // GET /api/shipments?status=PENDING_RECEIVE_CLEARANCE
+   
     @GetMapping
     public ResponseEntity<List<ShipmentDTO.Response>> getAll(
             @RequestParam(required = false) ShipmentStatus status) {
         return ResponseEntity.ok(status != null ? service.getByStatus(status) : service.getAll());
     }
 
-    // GET /api/shipments/{id}
+
     @GetMapping("/{id}")
     public ResponseEntity<ShipmentDTO.Response> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
-    // PUT /api/shipments/{id}
+   
     @PutMapping("/{id}")
     public ResponseEntity<ShipmentDTO.Response> update(
             @PathVariable Long id,
@@ -49,7 +48,7 @@ public class ShipmentController {
         return ResponseEntity.ok(service.update(id, req));
     }
 
-    // DELETE /api/shipments/{id}
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
