@@ -55,7 +55,6 @@ public class ShipmentController {
         return ResponseEntity.noContent().build();
     }
 
-    // PATCH /api/shipments/{id}/advance
     @PatchMapping("/{id}/advance")
     public ResponseEntity<ShipmentDTO.Response> advance(@PathVariable Long id) {
         return ResponseEntity.ok(service.advanceStatus(id));
